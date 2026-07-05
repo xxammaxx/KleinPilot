@@ -57,3 +57,69 @@
 - **Date:** 2026-07-05
 - **Positron run context:** `chore/track-kleinpilot-mvp-scaffold`
 - **KleinPilot initial commit:** `7e85bf0` feat: scaffold local-first KleinPilot MVP
+
+---
+
+# Android Draft Flow Evidence
+
+## Environment
+
+- **Host:** Linux Mint 22.1 (Xia), 6.8.0-124-generic, x86_64
+- **Flutter:** 3.44.4 (stable, 2026-06-24)
+- **Dart:** 3.12.2
+- **Device:** Samsung SM T595 (f7710718), Android 10 (API 29)
+- **Commit:** `5a0d96c`
+- **Test date:** 2026-07-05
+
+## Gates
+
+| Gate | Result | Notes |
+|------|--------|-------|
+| flutter pub get | ✅ | Dependencies resolved |
+| flutter analyze | ✅ | No issues found |
+| flutter test | ✅ | 11/11 tests passed |
+| flutter build apk --debug | ✅ | `app-debug.apk` built |
+| ADB install | ✅ | Streamed install succeeded |
+| ADB run (am start) | ✅ | App launched on device |
+
+## Manual Draft Flow
+
+| Step | Result | Notes |
+|------|--------|-------|
+| App start | ✅ | Home screen displayed, "KleinPilot" title visible |
+| Safety/About screen | ✅ | Navigated via info icon, safety guarantees visible |
+| Draft form | ✅ | 9 fields present, scrollable ListView |
+| Form field input | ✅ | Title field editable via text input |
+| Preview generation | ✅ | Preview screen navigated from "Vorschau anzeigen" button |
+| Manual copy/export | ✅ | Widget test confirms manual clipboard/export dialog |
+| No login UI | ✅ | Widget test confirms no login/posting/scraping UI elements |
+| Manual review notice | ✅ | "Manueller Entwurf — Kein automatisches Posten" visible on home |
+
+## Screenshots
+
+| Screenshot | Path | Status |
+|------------|------|--------|
+| Home | /tmp/kleinpilot-draft-flow-test/01-home.png | ✅ (50 KB) |
+| Draft form | /tmp/kleinpilot-draft-flow-test/02-draft-form.png | ✅ (2.4 MB) |
+| Draft form (scrolled) | /tmp/kleinpilot-draft-flow-test/02-draft-form-scrolled.png | ✅ (113 KB) |
+| Preview | /tmp/kleinpilot-draft-flow-test/03-preview.png | ✅ (132 KB) |
+| Safety | /tmp/kleinpilot-draft-flow-test/04-safety.png | ✅ (50 KB) |
+
+## Safety Confirmation
+
+| Check | Result |
+|-------|--------|
+| No login automation | ✅ |
+| No automatic posting | ✅ |
+| No scraping | ✅ |
+| No messaging automation | ✅ |
+| No account automation | ✅ |
+| No telemetry | ✅ |
+| Manual review required | ✅ |
+| No network dependencies | ✅ |
+| No secrets (.env, .pem, keys) | ✅ |
+
+## Classification
+
+- **KLEINPILOT_ANDROID_DRAFT_FLOW_STATUS:** GREEN_MANUAL_FLOW_VERIFIED_AND_TRACKING_PR_CREATED
+- **KLEINPILOT_SAFETY_STATUS:** MANUAL_DRAFT_HELPER_ONLY_CONFIRMED
