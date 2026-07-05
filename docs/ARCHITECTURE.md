@@ -40,7 +40,19 @@ The UI is built with Material Design 3 components. Navigation uses
 ### DraftFormatter
 
 Pure Dart class that takes a `Draft` model and produces a human-readable,
-structured text block. No external dependencies, no I/O, no network.
+structured German text block. No external dependencies, no I/O, no network.
+
+Formatting rules:
+- Title is the heading (no "Titel:" prefix)
+- Description is a natural intro sentence (no "Beschreibung:" prefix)
+- Section headers for condition, defects, included items, price, handover, location
+- Proper singular/plural for photo count ("1 Foto" / "2 Fotos")
+- Empty/whitespace-only fields are silently omitted
+- Manual review notice always printed at end
+
+Future: Template modes (spare parts, electronics, furniture, bikes, etc.) could
+specialize intro sentences and section ordering, but are deferred to keep the
+current pass small and testable.
 
 ## Model Layer
 
