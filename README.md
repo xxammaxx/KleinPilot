@@ -32,16 +32,17 @@ KleinPilot helps create local listing drafts. It does **not** post listings auto
 - No iOS/web in MVP
 - Tested on Samsung SM T595 (Android 10 / API 29)
 
-## MVP Status (2026-07-05)
+## MVP Status (2026-07-06)
 
 | Gate | Result |
 |------|--------|
 | flutter pub get | ✅ |
 | flutter analyze | ✅ No issues |
-| flutter test | ✅ 11/11 passed |
+| flutter test | ✅ 37/37 passed (26 formatter + 11 widget) |
 | flutter build apk --debug | ✅ `app-debug.apk` |
 | Android install (SM T595, API 29) | ✅ |
 | Android run | ✅ App launched |
+| Template quality pass | ✅ Improved German listing output |
 | Safety: no network deps | ✅ |
 | Safety: no telemetry | ✅ |
 | Safety: no secrets | ✅ |
@@ -84,6 +85,18 @@ KleinPilot can attach local photos to a draft for manual review.
 - No automatic posting to Kleinanzeigen.de
 - No EXIF/GPS data extraction
 - Photos must be manually reviewed before use
+
+## Listing Template Quality
+
+KleinPilot produces structured, copy-ready German listing text:
+
+- Title as heading — no machine-style "Titel:" prefix
+- Description as natural intro sentence
+- Clean section headers: Zustand, Mängel/Hinweise, Lieferumfang, etc.
+- Proper singular/plural for photo count
+- Empty/optional fields silently omitted
+- Manual review notice always at end
+- No AI generation, no cloud — deterministic local formatting
 
 ## Evidence
 

@@ -321,3 +321,113 @@ interaction with a synthetic test image.
 
 - **KLEINPILOT_PHOTO_PICKER_FULL_MANUAL_STATUS:** GREEN_FULL_MANUAL_PICKER_VERIFIED_AND_TRACKED
 - **KLEINPILOT_PHOTO_PICKER_SAFETY_STATUS:** TEST_IMAGE_ONLY_NO_PRIVATE_DATA
+
+---
+
+# Listing Template Quality Pass Evidence
+
+## Date
+
+- **Performed:** 2026-07-06
+- **Orchestrator Run:** Positron Issue Orchestrator
+- **Commit:** (pending — feat/listing-template-quality branch)
+
+## Purpose
+
+Improve deterministic German listing draft output quality. Better section structure, cleaner copy, proper singular/plural for photos, natural heading flow.
+
+## Scope
+
+- Formatter quality improvement: better German section structure
+- Empty-field handling: fields omitted when empty/whitespace-only
+- Photo count phrasing: proper singular/plural ("1 Foto" / "2 Fotos")
+- Manual review notice: always retained at end
+- Golden-style test scenarios: spare parts, electronics, furniture, bikes
+
+## Non-Scope
+
+- No AI text generation
+- No cloud LLM
+- No price research automation
+- No Kleinanzeigen.de integration
+- No posting/login/scraping/upload automation
+
+## Formatter Changes
+
+| Area | Before | After |
+|------|--------|-------|
+| Title | `Titel:\nTitle\n` | `Title\n\n` (no label prefix, acts as heading) |
+| Description | `Beschreibung:\nText\n` | `Text\n\n` (natural intro, no label prefix) |
+| Condition | `Zustand:\nText\n` | `Zustand:\nText\n` (clean section header) |
+| Defects | `Mängel / Defekte:\nText\n` | `Mängel / Hinweise:\nText\n` (clearer phrasing) |
+| Photos | `Fotos: X Foto(s) lokal angehängt` | Proper singular/plural + Prüfhinweis |
+| Manual notice | `---\nHinweis:...` | `Hinweis:\n...` (cleaner, always at end) |
+| Empty fields | Skipped (was OK) | Skipped entirely, no empty headers |
+
+## Gates
+
+| Gate | Result | Notes |
+|------|--------|-------|
+| flutter pub get | ✅ | Dependencies resolved |
+| flutter analyze | ✅ | No issues found |
+| flutter test | ✅ | 37/37 tests passed (26 formatter + 11 widget) |
+| flutter build apk --debug | ✅ | `app-debug.apk` built |
+| ADB install | ✅ | Streamed install succeeded |
+| ADB run | ✅ | App launched on SM T595 |
+
+## Test Results
+
+| Test suite | Result | Tests |
+|------------|--------|-------|
+| draft_formatter_test.dart | ✅ Passed | 26 tests (full draft, heading, intro, empty fields, singular/plural photos, price, defects, handover, location, safety checks, 4 golden-style scenarios) |
+| widget_test.dart | ✅ Passed | 11 tests (unchanged — app, safety, form, preview, copy/export, no-automation UI, photo section, photo preview, photo safety) |
+
+## Golden-Style Template Scenarios
+
+| Scenario | Input | Verdict |
+|----------|-------|---------|
+| Ersatzteil/Bastler | Sony TV Mainboard | ✅ Natural intro, condition, defects, 1 Foto, price, handover |
+| Elektronik | Samsung Galaxy S23 | ✅ 3 Fotos, Festpreis, location |
+| Möbel/Haushalt | IKEA Malm Kommode | ✅ No photos, VB price, location |
+| Fahrrad/E-Bike | Cube Reaction Hybrid Pro | ✅ 1 Foto, VB price, location |
+| Empty optional fields | title-only draft | ✅ All optional sections omitted |
+| Photo count singular | 1 photo attached | ✅ "1 Foto" (not "Foto(s)") |
+| Photo count plural | 3 photos attached | ✅ "3 Fotos" (not "Foto(s)") |
+
+## Android Smoke Test
+
+| Step | Result | Notes |
+|------|--------|-------|
+| App start | ✅ | Home screen displayed |
+| Draft form | ✅ | Form navigated, fields visible |
+| Title input | ✅ | "Test_Fahrrad" entered via adb |
+| Preview screen | ✅ | Preview displayed with new format |
+| Safety screen | ✅ | Safety guarantees visible |
+
+## Screenshots
+
+| Screenshot | Description | Path |
+|------------|-------------|------|
+| 01-home-screen.png | Home / Dashboard | `/tmp/kleinpilot-template-quality-pass/` |
+| 02-draft-form.png | Draft form | ditto |
+| 03-preview-text.png | Preview with new template | ditto |
+| 04-safety-screen.png | Safety screen | ditto |
+
+## Safety Confirmation
+
+| Check | Result |
+|-------|--------|
+| No AI text generation | ✅ — Pure deterministic string formatting |
+| No cloud LLM | ✅ — Zero network dependencies |
+| No upload | ✅ — No upload code, no HTTP calls |
+| No Kleinanzeigen automation | ✅ — No API integration |
+| No scraping/login/posting | ✅ — No platform integration |
+| No telemetry | ✅ — No analytics packages |
+| Manual review retained | ✅ — Notice always printed at end |
+| No new dependencies | ✅ — Only existing flutter SDK deps |
+| No secrets | ✅ — No .env/.pem/key files |
+
+## Classification
+
+- **KLEINPILOT_TEMPLATE_QUALITY_STATUS:** GREEN_TEMPLATE_QUALITY_VERIFIED_ON_ANDROID
+- **KLEINPILOT_TEMPLATE_SAFETY_STATUS:** DETERMINISTIC_LOCAL_TEMPLATES_ONLY
