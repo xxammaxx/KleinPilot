@@ -62,6 +62,18 @@ See [docs/SAFETY_POLICY.md](docs/SAFETY_POLICY.md) for full safety guarantees.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for architecture overview.
 
+## Android Draft Flow (2026-07-05)
+
+| Check | Result |
+|-------|--------|
+| Manual draft form flow | ✅ 9 fields, scrollable, editable |
+| Preview generation | ✅ Navigated and displayed |
+| Safety screen | ✅ Visible, guarantees confirmed |
+| Manual copy/export | ✅ Widget-test verified |
+| No automation UI | ✅ No login/posting/scraping |
+
+Status: **GREEN_MANUAL_FLOW_VERIFIED**
+
 ## Evidence
 
-See [docs/EVIDENCE.md](docs/EVIDENCE.md) for MVP scaffold evidence.
+See [docs/EVIDENCE.md](docs/EVIDENCE.md) for MVP scaffold and Android draft flow evidence.
