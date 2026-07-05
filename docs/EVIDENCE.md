@@ -202,10 +202,10 @@ The image picker requires manual interaction on the device (Android gallery pick
 | App start | ✅ | Home screen displayed |
 | Draft form navigation | ✅ | Form screen reached |
 | Photo section visible | ✅ | "Fotos" header, "Fotos hinzufügen" button, safety notice visible |
-| Photo picker opens | ⚠️ Manual | Requires human to tap button and select image |
-| Photo selected | ⚠️ Manual | Picker behavior confirmed by widget test mock |
-| Photo count updates | ⚠️ Manual | State management confirmed by unit test |
-| Photo removal | ⚠️ Manual | Remove icon and "Alle Fotos entfernen" button present |
+| Photo picker opens | ✅ | Full manual verification completed 2026-07-05 |
+| Photo selected | ✅ | Full manual verification completed 2026-07-05 |
+| Photo count updates | ✅ | Full manual verification completed 2026-07-05 |
+| Photo removal | ✅ | Full manual verification completed 2026-07-05 |
 | Preview with photo count | ✅ | Widget test confirms |
 | Safety screen photo items | ✅ | Widget test confirms |
 | Safety notice visible | ✅ | "Fotos bleiben lokal" notice confirmed |
@@ -238,3 +238,86 @@ The image picker requires manual interaction on the device (Android gallery pick
 
 - **KLEINPILOT_PHOTO_ATTACHMENT_STATUS:** GREEN_FEATURE_PR_CREATED_AND_TRACKED
 - **KLEINPILOT_PHOTO_SAFETY_STATUS:** LOCAL_ONLY_PHOTO_ATTACHMENTS_CONFIRMED
+
+---
+
+# Photo Picker Full Manual Device Verification
+
+## Date
+
+- **Performed:** 2026-07-05
+- **Orchestrator Run:** Positron Issue Orchestrator
+- **Commit:** d95522c42b6693ccefbaee87e0162752d1b14b09
+
+## Purpose
+
+Close the remaining manual verification note for the Android photo picker.
+Previous evidence noted that photo picker/selection was partially confirmed
+via UI/unit/widget tests; this run verifies the real Android photo picker
+interaction with a synthetic test image.
+
+## Environment
+
+- **Device:** Samsung SM T595 (gta2xllte), Android 10 (API 29)
+- **Device ID:** f7710718
+- **Flutter:** 3.44.4
+- **Dart:** 3.12.2
+- **Host:** Linux (xxammaxx workstation)
+
+## Test Image
+
+- **Source:** Synthetically generated locally
+- **Format:** JPEG, 1200×800, ~50 KB
+- **Content:** Text labels only — no personal data, no faces, no EXIF/GPS
+- **Device path:** `/sdcard/Pictures/KleinPilotTest/kleinpilot_test_photo.jpg`
+- **Visibility:** Confirmed in Android DocumentsUI picker
+
+## Manual Picker Flow
+
+| Step | Result | Notes |
+|------|--------|-------|
+| App launched | ✅ | Home screen reached via `adb monkey` |
+| Draft form opened | ✅ | "Neue Anzeige vorbereiten" tapped |
+| Photo section visible | ✅ | "Fotos" header, "Fotos hinzufügen" button, safety notice |
+| Picker opened | ✅ | Android DocumentsUI (com.android.documentsui) |
+| Test image found | ✅ | "kleinpilot_test_photo.jpg, 51,11 KB" visible in grid |
+| Test image selected | ✅ | Tapped image in picker |
+| Returned to app | ✅ | DraftFormScreen showing photo section |
+| Photo count displayed | ✅ | "1 Foto(s)" with filename shown |
+| Filename displayed | ✅ | "kleinpilot_test_photo.jpg" |
+| Safety notice remains | ✅ | "Fotos bleiben lokal auf deinem Gerät..." |
+| Preview photo count | ✅ | "Fotos: 1 lokal angehängt" on preview screen |
+| Remove photo (single) | ✅ | "Foto entfernen" tapped, returned to initial state |
+| Remove all photos | ✅ | "Alle Fotos entfernen" tapped, returned to initial state |
+| No upload UI | ✅ | No upload, share, or posting elements present |
+| No private gallery data | ✅ | Only synthetic test image used |
+
+## Screenshots
+
+| Screenshot | Description | Path |
+|------------|-------------|------|
+| 01-photo-section-before.png | Photo section before picker | `/tmp/kleinpilot-photo-picker-verification/screenshots/` |
+| 02-photo-section-before-picker.png | Form scrolled to photo section | ditto |
+| 03-picker-opened.png | Android DocumentsUI picker with test image visible | ditto |
+| 04-after-selection.png | Draft form showing "1 Foto(s)" after selection | ditto |
+| 05-preview-screen.png | Preview showing "Fotos: 1 lokal angehängt" | ditto |
+| 06-photo-removed.png | Photo section after single photo removal | ditto |
+| 07-all-photos-removed.png | Photo section after "Alle Fotos entfernen" | ditto |
+
+## Safety Confirmation (Re-verified)
+
+| Check | Result |
+|-------|--------|
+| Test image only (no private data) | ✅ |
+| No private gallery screenshots | ✅ |
+| No upload code triggered | ✅ |
+| No Kleinanzeigen automation | ✅ |
+| No EXIF/GPS extraction | ✅ |
+| No telemetry | ✅ |
+| Safety notice always visible | ✅ |
+| Manual review enforced | ✅ |
+
+## Final Classification
+
+- **KLEINPILOT_PHOTO_PICKER_FULL_MANUAL_STATUS:** GREEN_FULL_MANUAL_PICKER_VERIFIED_AND_TRACKED
+- **KLEINPILOT_PHOTO_PICKER_SAFETY_STATUS:** TEST_IMAGE_ONLY_NO_PRIVATE_DATA
