@@ -31,6 +31,20 @@ KleinPilot helps create local listing drafts. It does **not** post listings auto
 - No iOS/web in MVP
 - Tested on Samsung SM T595 (Android 10 / API 29)
 
+## MVP Status (2026-07-05)
+
+| Gate | Result |
+|------|--------|
+| flutter pub get | ✅ |
+| flutter analyze | ✅ No issues |
+| flutter test | ✅ 11/11 passed |
+| flutter build apk --debug | ✅ `app-debug.apk` |
+| Android install (SM T595, API 29) | ✅ |
+| Android run | ✅ App launched |
+| Safety: no network deps | ✅ |
+| Safety: no telemetry | ✅ |
+| Safety: no secrets | ✅ |
+
 ## Getting Started
 
 ```bash
