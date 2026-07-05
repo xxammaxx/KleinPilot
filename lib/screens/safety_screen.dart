@@ -49,6 +49,16 @@ class SafetyScreen extends StatelessWidget {
             'Keine Hintergrund-Aktivitäten',
             'Die App läuft nur, wenn du sie öffnest. Keine Hintergrunddienste, keine Uploads.',
           ),
+          _buildItem(
+            'Fotos bleiben lokal',
+            'Ausgewählte Fotos verbleiben auf deinem Gerät. Kein automatischer Upload, '
+                'keine Cloud-Synchronisation, keine Verbindung zu Kleinanzeigen.de.',
+          ),
+          _buildItem(
+            'Keine Foto-Automation',
+            'KleinPilot postet keine Fotos automatisch und liest keine EXIF-/GPS-Daten aus. '
+                'Fotos müssen manuell geprüft und ggf. selbst hochgeladen werden.',
+          ),
           const SizedBox(height: 24),
           const Divider(),
           const SizedBox(height: 16),

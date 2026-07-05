@@ -20,7 +20,8 @@ KleinPilot helps create local listing drafts. It does **not** post listings auto
 ## MVP Features
 
 - Create local draft with title, description, condition, defects, price, handover notes
-- Preview formatted listing text
+- Attach local photos to drafts (local file references only — no upload)
+- Preview formatted listing text with photo count
 - Manual copy to clipboard
 - Manual export dialog
 - Safety / About section with all guarantees
@@ -73,6 +74,16 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for architecture overview.
 | No automation UI | ✅ No login/posting/scraping |
 
 Status: **GREEN_MANUAL_FLOW_VERIFIED**
+
+## Photo Attachments
+
+KleinPilot can attach local photos to a draft for manual review.
+
+- Photos remain local on your device
+- No upload — files are not sent anywhere
+- No automatic posting to Kleinanzeigen.de
+- No EXIF/GPS data extraction
+- Photos must be manually reviewed before use
 
 ## Evidence
 

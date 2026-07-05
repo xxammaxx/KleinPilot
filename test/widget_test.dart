@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:kleinpilot/main.dart';
+import 'package:kleinpilot/models/draft.dart';
+import 'package:kleinpilot/screens/preview_screen.dart';
 
 void main() {
   testWidgets('App startet und zeigt KleinPilot', (WidgetTester tester) async {
@@ -128,7 +130,88 @@ void main() {
     expect(find.text('Exportieren'), findsOneWidget);
   });
 
-  testWidgets('Keine Login/Post/Scraping-UI sichtbar', (
+  testWidgets('Draft model supports photo attachments', (
+    WidgetTester tester,
+  ) async {
+    // Verify model behavior
+    final draft = Draft(title: 'Test', photoPaths: ['/tmp/photo.jpg']);
+    expect(draft.photoPaths.length, 1);
+    expect(draft.photoPaths.first, '/tmp/photo.jpg');
+
+    final emptyDraft = Draft();
+    expect(emptyDraft.photoPaths, isEmpty);
+  });
+
+  testWidgets('Photo section UI is visible in draft form', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const KleinPilotApp());
+
+    // Navigate to form
+    await tester.tap(find.text('Neue Anzeige vorbereiten'));
+    await tester.pumpAndSettle();
+
+    // Scroll to bottom to find photo section
+    final listView = find.byType(ListView);
+    await tester.drag(listView, const Offset(0, -900));
+    await tester.pumpAndSettle();
+
+    // Verify photo section elements
+    expect(find.text('Fotos'), findsOneWidget);
+    expect(find.text('Fotos hinzufügen'), findsOneWidget);
+
+    // Verify photo safety notice
+    expect(find.textContaining('Fotos bleiben lokal'), findsOneWidget);
+  });
+
+  testWidgets('Preview shows photo count when photos attached', (
+    WidgetTester tester,
+  ) async {
+    final draft = Draft(
+      title: 'Test Fahrrad',
+      photoPaths: ['/tmp/photo1.jpg', '/tmp/photo2.png'],
+    );
+
+    await tester.pumpWidget(MaterialApp(home: PreviewScreen(draft: draft)));
+
+    expect(find.text('Fotos: 2 lokal angehängt'), findsOneWidget);
+    expect(
+      find.textContaining('manuell geprüft und hochgeladen'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('Preview shows no photo info when no photos', (
+    WidgetTester tester,
+  ) async {
+    final draft = Draft(title: 'Test');
+
+    await tester.pumpWidget(MaterialApp(home: PreviewScreen(draft: draft)));
+
+    expect(find.textContaining('lokal angehängt'), findsNothing);
+  });
+
+  testWidgets('Safety screen shows photo safety items', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const KleinPilotApp());
+
+    // Navigate to safety screen
+    await tester.tap(find.byIcon(Icons.info_outline));
+    await tester.pumpAndSettle();
+
+    // Scroll down to reveal photo safety items (ListView lazy rendering)
+    final listView = find.byType(ListView);
+    await tester.drag(listView, const Offset(0, -400));
+    await tester.pumpAndSettle();
+
+    // Verify photo safety items
+    expect(find.text('Fotos bleiben lokal'), findsOneWidget);
+    expect(find.text('Keine Foto-Automation'), findsOneWidget);
+    expect(find.textContaining('Kein automatischer Upload'), findsOneWidget);
+  });
+
+  testWidgets('Keine Login/Post/Scraping/Upload-UI sichtbar', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const KleinPilotApp());
@@ -147,5 +230,11 @@ void main() {
     // Verify no scraping UI
     expect(find.text('Suchen'), findsNothing);
     expect(find.text('Scrapen'), findsNothing);
+
+    // Verify no upload/cloud UI
+    expect(find.text('Upload'), findsNothing);
+    expect(find.text('Hochladen'), findsNothing);
+    expect(find.text('Synchronisieren'), findsNothing);
+    expect(find.text('Cloud'), findsNothing);
   });
 }

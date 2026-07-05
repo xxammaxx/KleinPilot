@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/draft.dart';
 import 'preview_screen.dart';
 
@@ -84,6 +85,8 @@ class _DraftFormScreenState extends State<DraftFormScreen> {
               hint: 'z.B. Stadtteil, PLZ (freiwillig)',
             ),
             const SizedBox(height: 24),
+            _buildPhotoSection(),
+            const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -124,6 +127,139 @@ class _DraftFormScreenState extends State<DraftFormScreen> {
         onChanged: onChanged,
       ),
     );
+  }
+
+  Widget _buildPhotoSection() {
+    final photoCount = _draft.photoPaths.length;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.photo_library, color: Colors.teal),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'Fotos',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                if (photoCount > 0)
+                  Text(
+                    '$photoCount Foto(s)',
+                    style: const TextStyle(
+                      color: Colors.teal,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            if (photoCount > 0) ...[
+              const SizedBox(height: 4),
+              ..._draft.photoPaths.asMap().entries.map((entry) {
+                final idx = entry.key;
+                final path = entry.value;
+                final fileName = path.split('/').last;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2.0),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.image, size: 18, color: Colors.grey),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          fileName,
+                          style: const TextStyle(fontSize: 13),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, size: 18),
+                        tooltip: 'Foto entfernen',
+                        onPressed: () => _removePhoto(idx),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minWidth: 32,
+                          minHeight: 32,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+              const SizedBox(height: 8),
+            ],
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _pickPhoto,
+                icon: const Icon(Icons.add_photo_alternate),
+                label: Text(
+                  photoCount > 0
+                      ? 'Weiteres Foto hinzufügen'
+                      : 'Fotos hinzufügen',
+                ),
+              ),
+            ),
+            if (photoCount > 0) ...[
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton.icon(
+                  onPressed: () {
+                    setState(() => _draft.photoPaths.clear());
+                  },
+                  icon: const Icon(Icons.delete_outline, size: 18),
+                  label: const Text('Alle Fotos entfernen'),
+                  style: TextButton.styleFrom(foregroundColor: Colors.red),
+                ),
+              ),
+            ],
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: Colors.orange.shade200),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.info_outline, size: 16, color: Colors.orange),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Fotos bleiben lokal auf deinem Gerät und werden nicht automatisch hochgeladen.',
+                      style: TextStyle(fontSize: 12, color: Colors.orange),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickPhoto() async {
+    final picker = ImagePicker();
+    final xFile = await picker.pickImage(source: ImageSource.gallery);
+    if (xFile != null && mounted) {
+      setState(() {
+        _draft.photoPaths.add(xFile.path);
+      });
+    }
+  }
+
+  void _removePhoto(int index) {
+    setState(() {
+      _draft.photoPaths.removeAt(index);
+    });
   }
 
   void _onPreview() {

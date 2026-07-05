@@ -82,5 +82,37 @@ void main() {
       // Should contain the trimmed value
       expect(result, contains('Trim Test'));
     });
+
+    group('Photo Attachments', () {
+      test('zeigt Foto-Anzahl an, wenn Fotos vorhanden', () {
+        final draft = Draft(
+          title: 'Test',
+          photoPaths: ['/tmp/photo1.jpg', '/tmp/photo2.png'],
+        );
+        final result = DraftFormatter().format(draft);
+
+        expect(result, contains('Fotos: 2 Foto(s) lokal angehängt'));
+        expect(
+          result,
+          contains('Fotos bleiben lokal und werden nicht hochgeladen'),
+        );
+      });
+
+      test('zeigt keine Foto-Info, wenn keine Fotos vorhanden', () {
+        final draft = Draft(title: 'Test');
+        final result = DraftFormatter().format(draft);
+
+        expect(result, isNot(contains('Fotos:')));
+        expect(result, isNot(contains('lokal angehängt')));
+      });
+
+      test('formatiert Einzelfoto korrekt (Singular-Test)', () {
+        final draft = Draft(title: 'Test', photoPaths: ['/tmp/photo.jpg']);
+        final result = DraftFormatter().format(draft);
+
+        expect(result, contains('Fotos: 1 Foto(s) lokal angehängt'));
+        expect(result, contains('Kein automatisches Posting'));
+      });
+    });
   });
 }
