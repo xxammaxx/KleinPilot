@@ -23,6 +23,13 @@ class DraftFormatter {
     appendIfNotEmpty('Übergabe', draft.handoverNote);
     appendIfNotEmpty('Standort', draft.locationNote);
 
+    if (draft.photoPaths.isNotEmpty) {
+      buffer.writeln(
+        'Fotos: ${draft.photoPaths.length} Foto(s) lokal angehängt',
+      );
+      buffer.writeln('(Fotos bleiben lokal und werden nicht hochgeladen)\n');
+    }
+
     buffer.writeln('---');
     buffer.writeln(
       'Hinweis: Dies ist ein manuell zu prüfender Entwurf. '

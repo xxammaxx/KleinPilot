@@ -46,8 +46,14 @@ structured text block. No external dependencies, no I/O, no network.
 
 ### Draft
 
-Simple data class with 9 string fields. No persistence in MVP (future: local
-SQLite or shared_preferences only, never cloud).
+Simple data class with 9 string fields and a list of local photo file paths.
+No persistence in MVP (future: local SQLite or shared_preferences only, never cloud).
+
+### Photo Attachments
+
+Photo attachments are local draft metadata. File paths are stored as `List<String>`
+in the Draft model. KleinPilot does NOT upload photos or integrate with Kleinanzeigen.de.
+No EXIF/GPS data is extracted — only file paths are referenced.
 
 ## No Platform Automation
 
@@ -68,6 +74,7 @@ paste the output into their platform of choice.
 |---------|---------|---------|------|
 | flutter | SDK | Framework | Core |
 | cupertino_icons | ^1.0.8 | iOS-style icons | None |
+| image_picker | ^1.2.3 | Local gallery photo selection | None — intent-based |
 | flutter_test | SDK (dev) | Testing | None |
 | flutter_lints | ^6.0.0 (dev) | Linting | None |
 

@@ -39,6 +39,29 @@ class PreviewScreen extends StatelessWidget {
                 ),
               ],
             ),
+            if (draft.photoPaths.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(Icons.photo_library, color: Colors.teal, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Fotos: ${draft.photoPaths.length} lokal angehängt',
+                    style: const TextStyle(
+                      color: Colors.teal,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Fotos müssen später manuell geprüft und hochgeladen werden, '
+                'falls du sie verwenden möchtest.',
+                style: TextStyle(fontSize: 11, color: Colors.grey),
+              ),
+            ],
             const SizedBox(height: 16),
             Expanded(
               child: SingleChildScrollView(
