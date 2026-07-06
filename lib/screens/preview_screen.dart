@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/draft.dart';
 import '../services/draft_formatter.dart';
+import '../services/draft_storage.dart';
 
 /// Preview screen.
 ///
@@ -143,6 +144,29 @@ class PreviewScreen extends StatelessWidget {
                     },
                     icon: const Icon(Icons.ios_share),
                     label: const Text('Exportieren'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      final storage = DraftStorage();
+                      await storage.saveDraft(draft);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Entwurf lokal gespeichert.'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.save_outlined),
+                    label: const Text('Entwurf speichern'),
                   ),
                 ),
               ],

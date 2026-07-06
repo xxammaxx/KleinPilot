@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/draft.dart';
+import '../services/draft_storage.dart';
 import 'preview_screen.dart';
 
 /// Draft form screen.
 ///
 /// Collects all fields for a local Kleinanzeigen listing draft.
 /// No network, no auto-posting, no scraping.
+///
+/// If [existingDraft] is provided, the form is pre-populated with
+/// the saved draft's values (editing mode).
 class DraftFormScreen extends StatefulWidget {
-  const DraftFormScreen({super.key});
+  final Draft? existingDraft;
+
+  const DraftFormScreen({super.key, this.existingDraft});
 
   @override
   State<DraftFormScreen> createState() => _DraftFormScreenState();
@@ -16,17 +22,57 @@ class DraftFormScreen extends StatefulWidget {
 
 class _DraftFormScreenState extends State<DraftFormScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _draft = Draft();
+  late final Draft _draft;
+  final DraftStorage _storage = DraftStorage();
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // If loading an existing draft, copy its values.
+    // Otherwise start with a fresh draft.
+    if (widget.existingDraft != null) {
+      _draft = widget.existingDraft!.copyWith();
+    } else {
+      _draft = Draft();
+    }
+  }
+
+  bool get _isEditing => widget.existingDraft != null;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Anzeigenentwurf')),
+      appBar: AppBar(
+        title: Text(_isEditing ? 'Entwurf bearbeiten' : 'Anzeigenentwurf'),
+      ),
       body: Form(
         key: _formKey,
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
+            // --- Local-only notice ---
+            Container(
+              padding: const EdgeInsets.all(10),
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: Colors.teal.shade50,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: Colors.teal.shade100),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.lock, size: 14, color: Colors.teal),
+                  SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      'Nur lokal auf diesem Gerät gespeichert.',
+                      style: TextStyle(fontSize: 12, color: Colors.teal),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             _buildField(
               'Titel',
               _draft.title,
@@ -87,13 +133,38 @@ class _DraftFormScreenState extends State<DraftFormScreen> {
             const SizedBox(height: 24),
             _buildPhotoSection(),
             const SizedBox(height: 16),
+
+            // --- Save Draft button ---
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
+                onPressed: _saving ? null : _onSave,
+                icon: _saving
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.save),
+                label: Text(
+                  _isEditing ? 'Entwurf aktualisieren' : 'Entwurf speichern',
+                ),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  textStyle: const TextStyle(fontSize: 16),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            // --- Preview button ---
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
                 onPressed: _onPreview,
                 icon: const Icon(Icons.preview),
                 label: const Text('Vorschau anzeigen'),
-                style: ElevatedButton.styleFrom(
+                style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   textStyle: const TextStyle(fontSize: 16),
                 ),
@@ -159,7 +230,6 @@ class _DraftFormScreenState extends State<DraftFormScreen> {
             ),
             const SizedBox(height: 8),
             if (photoCount > 0) ...[
-              const SizedBox(height: 4),
               ..._draft.photoPaths.asMap().entries.map((entry) {
                 final idx = entry.key;
                 final path = entry.value;
@@ -260,6 +330,24 @@ class _DraftFormScreenState extends State<DraftFormScreen> {
     setState(() {
       _draft.photoPaths.removeAt(index);
     });
+  }
+
+  Future<void> _onSave() async {
+    setState(() => _saving = true);
+    try {
+      await _storage.saveDraft(_draft);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Entwurf lokal gespeichert.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   void _onPreview() {

@@ -8,16 +8,17 @@ no cloud services, and no network dependencies.
 ```
 ┌──────────────────────────────────┐
 │  UI Layer (screens/)             │
-│  - HomeScreen                    │
-│  - DraftFormScreen               │
-│  - PreviewScreen                 │
-│  - SafetyScreen                  │
+│  - HomeScreen (Stateful)          │
+│  - DraftFormScreen (Stateful)     │
+│  - PreviewScreen                  │
+│  - SafetyScreen                   │
 ├──────────────────────────────────┤
 │  Service Layer (services/)       │
 │  - DraftFormatter                │
+│  - DraftStorage                  │
 ├──────────────────────────────────┤
 │  Model Layer (models/)           │
-│  - Draft (data class)            │
+│  - Draft (data + persistence)    │
 └──────────────────────────────────┘
 ```
 
@@ -30,9 +31,9 @@ The UI is built with Material Design 3 components. Navigation uses
 
 | Screen | Purpose | State |
 |--------|---------|-------|
-| HomeScreen | Dashboard, entry point | Stateless |
-| DraftFormScreen | 9-field form for listing draft | Stateful (form state) |
-| PreviewScreen | Generated text display + copy/export | Stateless |
+| HomeScreen | Dashboard, entry point, draft list | Stateful (async load) |
+| DraftFormScreen | 9-field form for listing draft, save + preview | Stateful (form state, async save) |
+| PreviewScreen | Generated text display + copy/export/save | Stateless |
 | SafetyScreen | Safety guarantees display | Stateless |
 
 ## Service Layer
@@ -54,11 +55,29 @@ Future: Template modes (spare parts, electronics, furniture, bikes, etc.) could
 specialize intro sentences and section ordering, but are deferred to keep the
 current pass small and testable.
 
+### DraftStorage
+
+Service for local-only draft persistence via SharedPreferences.
+Stores drafts as a JSON array under a single key. No network, no cloud sync.
+
+- `loadDrafts()` — loads all saved drafts, sorted by recency
+- `saveDraft(draft)` — creates or updates a draft with local ID
+- `deleteDraft(id)` — removes a single draft
+- `clearAllDrafts()` — removes all drafts (test helper)
+
+Corrupted JSON returns an empty list without crashing.
+
 ## Model Layer
 
 ### Draft
 
-Simple data class with 9 string fields and a list of local photo file paths.
+Data class with 9 string fields, a list of local photo file paths,
+and optional persistence fields (id, createdAt, updatedAt).
+
+- `toJson()` / `fromJson()` for serialization
+- `copyWith()` for immutable updates
+- `id` is null for unsaved drafts; assigned on first save
+
 No persistence in MVP (future: local SQLite or shared_preferences only, never cloud).
 
 ### Photo Attachments
@@ -87,7 +106,12 @@ paste the output into their platform of choice.
 | flutter | SDK | Framework | Core |
 | cupertino_icons | ^1.0.8 | iOS-style icons | None |
 | image_picker | ^1.2.3 | Local gallery photo selection | None — intent-based |
+| shared_preferences | ^2.5.5 | Local draft persistence (JSON) | None — Android SharedPreferences |
 | flutter_test | SDK (dev) | Testing | None |
 | flutter_lints | ^6.0.0 (dev) | Linting | None |
 
-**No network, analytics, cloud, or automation dependencies.**
+## Local Draft Persistence
+
+Drafts are stored locally on the device using SharedPreferences as a JSON array.
+KleinPilot does not sync drafts to a server and does not require an account.
+All draft data remains exclusively on the device.

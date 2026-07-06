@@ -21,6 +21,8 @@ KleinPilot helps create local listing drafts. It does **not** post listings auto
 
 - Create local draft with title, description, condition, defects, price, handover notes
 - Attach local photos to drafts (local file references only — no upload)
+- Save drafts locally on the device (SharedPreferences, JSON)
+- List saved drafts, reopen for editing, delete
 - Preview formatted listing text with photo count
 - Manual copy to clipboard
 - Manual export dialog
@@ -38,10 +40,11 @@ KleinPilot helps create local listing drafts. It does **not** post listings auto
 |------|--------|
 | flutter pub get | ✅ |
 | flutter analyze | ✅ No issues |
-| flutter test | ✅ 37/37 passed (26 formatter + 11 widget) |
+| flutter test | ✅ 56/56 passed (26 formatter + 14 widget + 16 storage) |
 | flutter build apk --debug | ✅ `app-debug.apk` |
 | Android install (SM T595, API 29) | ✅ |
 | Android run | ✅ App launched |
+| Local draft persistence | ✅ Save, list, reopen, edit, delete |
 | Template quality pass | ✅ Improved German listing output |
 | Safety: no network deps | ✅ |
 | Safety: no telemetry | ✅ |
@@ -97,6 +100,19 @@ KleinPilot produces structured, copy-ready German listing text:
 - Empty/optional fields silently omitted
 - Manual review notice always at end
 - No AI generation, no cloud — deterministic local formatting
+
+## Local Draft Persistence
+
+KleinPilot can save drafts locally on the device for later editing:
+
+- Save drafts with all fields and photo references
+- List all saved drafts on the home screen
+- Reopen any draft for editing and resave
+- Delete drafts with confirmation
+- All data stays on the device — SharedPreferences, JSON
+- No cloud sync, no account, no upload
+
+Status: **GREEN_LOCAL_PERSISTENCE_VERIFIED_ON_ANDROID**
 
 ## Evidence
 

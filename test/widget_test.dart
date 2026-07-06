@@ -1,25 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:kleinpilot/main.dart';
 import 'package:kleinpilot/models/draft.dart';
 import 'package:kleinpilot/screens/preview_screen.dart';
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
   testWidgets('App startet und zeigt KleinPilot', (WidgetTester tester) async {
     await tester.pumpWidget(const KleinPilotApp());
 
-    // Verify app title is visible (appears in AppBar and body)
+    // HomeScreen is now async (loads drafts from SharedPreferences).
+    // pumpAndSettle waits for the async operation.
+    await tester.pumpAndSettle();
+
+    // Verify app title is visible (appears in AppBar and body heading)
     expect(find.text('KleinPilot'), findsAtLeast(1));
 
-    // Verify dashboard shows the subtitle
+    // Verify dashboard shows the subtitle (inside ListView, scroll to top)
+    final listView = find.byType(ListView).first;
+    await tester.drag(listView, const Offset(0, 200)); // scroll up to find text
+    await tester.pumpAndSettle();
+
     expect(find.text('Lokale Anzeigen-Entwürfe vorbereiten'), findsOneWidget);
   });
 
   testWidgets('Safety-Hinweise sind sichtbar', (WidgetTester tester) async {
     await tester.pumpWidget(const KleinPilotApp());
+    await tester.pumpAndSettle();
 
-    // Check the safety note on the home screen
+    // Check the safety note on the home screen (it's in a ListView now)
     expect(
       find.text('Manueller Entwurf — Kein automatisches Posten'),
       findsOneWidget,
@@ -41,6 +55,7 @@ void main() {
 
   testWidgets('Draft form has all 9 fields', (WidgetTester tester) async {
     await tester.pumpWidget(const KleinPilotApp());
+    await tester.pumpAndSettle();
 
     // Navigate to form
     await tester.tap(find.text('Neue Anzeige vorbereiten'));
@@ -55,7 +70,7 @@ void main() {
     expect(find.text('Zustand'), findsOneWidget);
 
     // Scroll down to reveal more fields
-    final listView = find.byType(ListView);
+    final listView = find.byType(ListView).first;
     await tester.drag(listView, const Offset(0, -300));
     await tester.pumpAndSettle();
 
@@ -76,12 +91,14 @@ void main() {
     expect(find.text('Übergabe (Abholung / Versand)'), findsOneWidget);
     expect(find.text('Standort (ungefähre Angabe)'), findsOneWidget);
 
-    // Verify preview button is visible at the bottom
+    // Verify save and preview buttons are visible
+    expect(find.text('Entwurf speichern'), findsOneWidget);
     expect(find.text('Vorschau anzeigen'), findsOneWidget);
   });
 
   testWidgets('Eingaben erzeugen Preview-Text', (WidgetTester tester) async {
     await tester.pumpWidget(const KleinPilotApp());
+    await tester.pumpAndSettle();
 
     // Navigate to form
     await tester.tap(find.text('Neue Anzeige vorbereiten'));
@@ -93,7 +110,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Scroll to the preview button
-    final listView = find.byType(ListView);
+    final listView = find.byType(ListView).first;
     await tester.drag(listView, const Offset(0, -900));
     await tester.pumpAndSettle();
 
@@ -111,13 +128,14 @@ void main() {
 
   testWidgets('Copy/Export bleibt manueller Flow', (WidgetTester tester) async {
     await tester.pumpWidget(const KleinPilotApp());
+    await tester.pumpAndSettle();
 
     // Navigate to form
     await tester.tap(find.text('Neue Anzeige vorbereiten'));
     await tester.pumpAndSettle();
 
     // Scroll to the preview button
-    final listView = find.byType(ListView);
+    final listView = find.byType(ListView).first;
     await tester.drag(listView, const Offset(0, -900));
     await tester.pumpAndSettle();
 
@@ -146,13 +164,14 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const KleinPilotApp());
+    await tester.pumpAndSettle();
 
     // Navigate to form
     await tester.tap(find.text('Neue Anzeige vorbereiten'));
     await tester.pumpAndSettle();
 
     // Scroll to bottom to find photo section
-    final listView = find.byType(ListView);
+    final listView = find.byType(ListView).first;
     await tester.drag(listView, const Offset(0, -900));
     await tester.pumpAndSettle();
 
@@ -195,13 +214,14 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const KleinPilotApp());
+    await tester.pumpAndSettle();
 
     // Navigate to safety screen
     await tester.tap(find.byIcon(Icons.info_outline));
     await tester.pumpAndSettle();
 
     // Scroll down to reveal photo safety items (ListView lazy rendering)
-    final listView = find.byType(ListView);
+    final listView = find.byType(ListView).first;
     await tester.drag(listView, const Offset(0, -400));
     await tester.pumpAndSettle();
 
@@ -215,6 +235,7 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const KleinPilotApp());
+    await tester.pumpAndSettle();
 
     // Verify no login UI
     expect(find.text('Login'), findsNothing);
@@ -236,5 +257,61 @@ void main() {
     expect(find.text('Hochladen'), findsNothing);
     expect(find.text('Synchronisieren'), findsNothing);
     expect(find.text('Cloud'), findsNothing);
+  });
+
+  group('Draft Persistence UI', () {
+    testWidgets('Home zeigt "Nur lokal gespeichert" Hinweis bei Entwürfen', (
+      WidgetTester tester,
+    ) async {
+      // Pre-populate a saved draft
+      SharedPreferences.setMockInitialValues({
+        'kleinpilot_saved_drafts':
+            '[{"id":"test-1","title":"Gespeicherter Test","categoryNote":"","condition":"","description":"","defects":"","includedItems":"","priceNote":"","handoverNote":"","locationNote":"","photoPaths":[],"createdAt":"2026-01-01T00:00:00.000Z","updatedAt":"2026-01-02T00:00:00.000Z"}]',
+      });
+
+      await tester.pumpWidget(const KleinPilotApp());
+      await tester.pumpAndSettle();
+
+      // Saved draft should appear
+      expect(find.text('Gespeicherter Test'), findsOneWidget);
+
+      // Local-only notice should appear
+      expect(
+        find.textContaining('Nur lokal auf diesem Gerät gespeichert'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('"Entwurf speichern" Button ist im Formular vorhanden', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(const KleinPilotApp());
+      await tester.pumpAndSettle();
+
+      // Navigate to form
+      await tester.tap(find.text('Neue Anzeige vorbereiten'));
+      await tester.pumpAndSettle();
+
+      // Local-only notice at top (visible)
+      expect(
+        find.textContaining('Nur lokal auf diesem Gerät gespeichert'),
+        findsOneWidget,
+      );
+
+      // Scroll to bottom where save button is (after photo section)
+      final listView = find.byType(ListView).first;
+      await tester.drag(listView, const Offset(0, -900));
+      await tester.pumpAndSettle();
+
+      // Save button should be visible after scrolling down
+      expect(find.text('Entwurf speichern'), findsOneWidget);
+    });
+
+    testWidgets('Preview screen has save button', (WidgetTester tester) async {
+      final draft = Draft(title: 'Test');
+      await tester.pumpWidget(MaterialApp(home: PreviewScreen(draft: draft)));
+
+      expect(find.text('Entwurf speichern'), findsOneWidget);
+    });
   });
 }
