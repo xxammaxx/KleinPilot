@@ -7,6 +7,7 @@ interact with Kleinanzeigen.de or any other online platform.
 
 - Local draft creation (title, description, condition, defects, etc.)
 - Local photo attachment to drafts (file paths only, no upload)
+- Local draft persistence (save, list, reopen, edit, delete)
 - Manual preview of formatted listing text with photo count
 - Manual copy to clipboard
 - Manual export via dialog
@@ -42,6 +43,7 @@ The app intentionally uses **zero network dependencies**:
 - No `sentry_flutter`
 - No analytics or crash reporting SDKs
 - `image_picker` (intent-based gallery access, no network for Android)
+- `shared_preferences` (local key-value storage, no network)
 
 ### Transitive Dependencies
 - `http` is a transitive dependency of `image_picker_platform_interface` (used only by web/linux plugins, not compiled into Android APK)
@@ -71,3 +73,17 @@ Photos attached to drafts remain strictly local:
 The `image_picker` package is used solely for accessing the device gallery
 via Android intents. It does not introduce network access for photo operations
 on Android.
+
+## Local Draft Storage
+
+Drafts are stored locally using SharedPreferences as a JSON array under a
+single key (`kleinpilot_saved_drafts`). KleinPilot does NOT:
+
+- Sync drafts to any cloud service
+- Upload drafts to any server
+- Require an account or login
+- Collect or transmit personal data
+- Send draft data off-device in any form
+
+Drafts must remain local unless the user manually copies/exports content.
+KleinPilot must not upload drafts automatically.

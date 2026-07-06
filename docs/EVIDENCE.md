@@ -431,3 +431,128 @@ Improve deterministic German listing draft output quality. Better section struct
 
 - **KLEINPILOT_TEMPLATE_QUALITY_STATUS:** GREEN_TEMPLATE_QUALITY_VERIFIED_ON_ANDROID
 - **KLEINPILOT_TEMPLATE_SAFETY_STATUS:** DETERMINISTIC_LOCAL_TEMPLATES_ONLY
+
+---
+
+# Draft Persistence Pass Evidence
+
+## Purpose
+
+Add local-only draft persistence for KleinPilot.
+
+## Scope
+
+- Save local draft.
+- List saved drafts.
+- Reopen draft.
+- Edit and resave draft.
+- Delete draft.
+- Preserve local photo path references.
+
+## Non-Scope
+
+- No cloud sync.
+- No account.
+- No login.
+- No upload.
+- No Kleinanzeigen.de integration.
+- No telemetry.
+- No AI generation.
+- No background services.
+
+## Storage
+
+- Storage backend: shared_preferences (JSON list)
+- Data format: JSON array of Draft objects under key `kleinpilot_saved_drafts`
+- Local-only confirmation: No network dependencies, no cloud sync code
+
+## Dependencies Added
+
+| Dependency | Version | Reason | Risk |
+|------------|---------|--------|------|
+| shared_preferences | ^2.5.5 | Local key-value storage for draft JSON | None — Android SharedPreferences, local only |
+
+## Gates
+
+| Gate | Result | Notes |
+|------|--------|-------|
+| flutter pub get | ✅ | Dependencies resolved |
+| flutter analyze | ✅ | No issues found |
+| flutter test | ✅ | 56/56 tests passed (26 formatter + 14 widget + 16 storage) |
+| flutter build apk --debug | ✅ | `app-debug.apk` built successfully |
+| ADB install | ✅ | Streamed install succeeded |
+| ADB run | ✅ | App launched on SM T595 |
+
+## Test Results
+
+| Test suite | Result | Tests |
+|------------|--------|-------|
+| draft_formatter_test.dart | ✅ Passed | 26 tests (unchanged) |
+| widget_test.dart | ✅ Passed | 14 tests (updated + 3 new persistence UI) |
+| draft_storage_test.dart | ✅ Passed | 16 tests (new) |
+
+## New Tests Added
+
+| Test | Result |
+|------|--------|
+| Draft serialisiert/deserialisiert alle Felder | ✅ |
+| photoPaths bleiben beim Serialisieren erhalten | ✅ |
+| Neuer Draft ohne id hat keine Persistenz-Felder | ✅ |
+| copyWith erzeugt korrekte Kopie | ✅ |
+| loadDrafts gibt leere Liste bei Erstnutzung | ✅ |
+| saveDraft speichert und loadDrafts lädt | ✅ |
+| saveDraft ersetzt Draft mit gleicher id | ✅ |
+| deleteDraft entfernt Draft | ✅ |
+| deleteDraft wirft keinen Fehler bei unbekannter id | ✅ |
+| clearAllDrafts entfernt alle Entwürfe | ✅ |
+| kaputtes JSON crasht nicht | ✅ |
+| loadDrafts sortiert nach updatedAt | ✅ |
+| saveDraft bewahrt createdAt | ✅ |
+| mehrere Drafts speichern/laden | ✅ |
+| photoPaths in Storage | ✅ |
+| Home zeigt gespeicherte Entwürfe an | ✅ |
+| "Nur lokal gespeichert" Hinweis sichtbar | ✅ |
+| "Entwurf speichern" Button im Formular | ✅ |
+| Preview Screen hat Save-Button | ✅ |
+
+## Android Persistence Smoke Test
+
+| Step | Result | Notes |
+|------|--------|-------|
+| App start | ✅ | Home screen displayed |
+| New draft created | ✅ | Draft form opened, title entered |
+| Draft saved | ✅ | "Entwurf lokal gespeichert" SnackBar |
+| App closed | ✅ | Force-stopped |
+| App restarted | ✅ | Restarted via adb monkey |
+| Draft persisted | ✅ | Draft visible in list after restart |
+| Draft reopened | ✅ | Form populated with saved values |
+| Draft deleted | ✅ | Deleted with confirmation dialog |
+| No upload/login/cloud visible | ✅ | Manual inspection confirmed |
+
+## Screenshots
+
+| Screenshot | Description | Path |
+|------------|-------------|------|
+| 01-empty-list-or-home.png | Home screen (empty/initial) | `/tmp/kleinpilot-draft-persistence-pass/` |
+| 02-draft-filled.png | Draft form with data | ditto |
+| 03-draft-saved-list.png | Home screen showing saved draft | ditto |
+| 04-reopened-draft.png | Saved draft visible after restart | ditto |
+| 05-after-delete.png | Home screen after deletion | ditto |
+
+## Safety Confirmation
+
+| Check | Result |
+|-------|--------|
+| Local-only storage | ✅ — shared_preferences, no network |
+| No cloud sync | ✅ — Zero cloud/remote storage code |
+| No account/login | ✅ — No auth, no user management |
+| No upload | ✅ — No upload code, no HTTP calls |
+| No Kleinanzeigen automation | ✅ — No API integration |
+| No telemetry | ✅ — No analytics packages |
+| No sensitive logs | ✅ — No full-draft logging |
+| No secrets | ✅ — No .env/.pem/key files |
+
+## Classification
+
+- **KLEINPILOT_DRAFT_PERSISTENCE_STATUS:** GREEN_LOCAL_PERSISTENCE_VERIFIED_ON_ANDROID
+- **KLEINPILOT_DRAFT_PERSISTENCE_SAFETY_STATUS:** LOCAL_ONLY_STORAGE_CONFIRMED
